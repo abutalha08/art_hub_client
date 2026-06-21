@@ -44,7 +44,7 @@ export default function RegisterPage() {
 
    const onSubmit = async (data) => {
 
-    console.log(data);
+    // console.log(data);
 
 
   try {
@@ -61,7 +61,7 @@ export default function RegisterPage() {
         role: data.role,
       });
 
-      console.log(signUpData, signUpError);
+      // console.log(signUpData, signUpError);
 
     if (signUpError) {
       toast.error(signUpError.message || "Registration failed");
@@ -75,7 +75,7 @@ export default function RegisterPage() {
     toast.error("Something went wrong");
   }
 };
-    console.log(errors);
+    // console.log(errors);
 
   return (
     <motion.div
@@ -126,7 +126,8 @@ export default function RegisterPage() {
           <Card className="w-full max-w-xl border border-[#27273A]/40 bg-[#12121C]/85 backdrop-blur-2xl shadow-[0_30px_120px_rgba(0,0,0,0.75)] rounded-2xl p-6">
             {/* HEADER */}
             <CardHeader className="flex flex-col gap-5 items-start pb-8">
-              <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-3 group">
+              
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#7928CA] to-[#B342F2] flex items-center justify-center shadow-lg shadow-[#7928CA]/25">
                   <IoColorPaletteSharp className="text-white text-xl" />
                 </div>
@@ -134,7 +135,8 @@ export default function RegisterPage() {
                 <span className="text-2xl font-bold tracking-wide bg-gradient-to-r from-white via-[#E032C4] to-[#B342F2] bg-clip-text text-transparent">
                   ArtHub
                 </span>
-              </div>
+              
+              </Link>
 
               <h1 className="text-4xl font-semibold text-white tracking-tight leading-snug">
                 Create your account
@@ -327,7 +329,7 @@ export default function RegisterPage() {
               <p className="text-center text-sm text-[#8E8E9F] mt-6">
                 Already have an account?{" "}
                 <Link
-                  href="/login"
+                  href="/auth/login"
                   className="text-[#B342F2] hover:text-[#F242C2] font-semibold transition"
                 >
                   Log In
