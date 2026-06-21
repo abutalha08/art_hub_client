@@ -2,151 +2,305 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FaTicketAlt, FaUser, FaSignOutAlt, FaThLarge } from "react-icons/fa";
+import { usePathname, useRouter } from "next/navigation";
+import { FiMenu, FiX, FiGrid, FiUser, FiLogOut } from "react-icons/fi";
+import { IoColorPaletteSharp } from "react-icons/io5";
+import Image from "next/image";
+import { authClient, useSession } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
-
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Browse Artworks", href: "/artworks" },
+];
 
 export default function Navbar() {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const user = session?.user;
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         setDropdownOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  useEffect(() => {
     setDropdownOpen(false);
-    alert("Logged Out! (Design Only)");
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setDropdownOpen(false);
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, []);
+
+  const handleLogout = async () => {
+    const loadingToast = toast.loading("Logging out...");
+
+    try {
+      await authClient.signOut();
+
+      toast.success("Logged out successfully!");
+      router.push("/");
+    } catch (error) {
+      toast.error("Logout failed!");
+      console.error("Logout failed:", error);
+    } finally {
+      toast.dismiss(loadingToast);
+    }
   };
 
-
-
-  const mockUser = {
-    name: "Jane Doe",
-    email: "jane@example.com",
-    role: "attendee",
-    image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"
-  };
+  const isActive = (href) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-slate-950/65 backdrop-blur-md py-3.5 px-6">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* LOGO */}
-        <h2>Talha</h2>
+    <nav className="sticky top-0 z-50 w-full border-b border-[#27273A]/60 bg-[#0C0C14]/90 backdrop-blur-xl py-3.5 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
 
-        {/* NAVIGATION LINKS */}
-        <div className="hidden sm:flex items-center gap-8">
-          <Link
-            href="/"
-            className={`text-sm font-medium transition-colors ${pathname === "/" ? "text-pink-500 font-semibold" : "text-slate-300 hover:text-white"}`}
-          >
-            Home
-          </Link>
-          <Link
-            href="/events"
-            className={`text-sm font-medium transition-colors ${pathname.startsWith("/events") ? "text-pink-500 font-semibold" : "text-slate-300 hover:text-white"}`}
-          >
-            Browse Events
-          </Link>
-          {isLoggedIn && (
+        {/* LOGO */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#7928CA] to-[#B342F2] flex items-center justify-center shadow-md shadow-[#7928CA]/20">
+            <IoColorPaletteSharp className="text-white text-xl" />
+          </div>
+          <span className="text-2xl font-serif font-bold text-white tracking-wide">
+            Art<span className="text-[#B342F2]">Hub</span>
+          </span>
+        </Link>
+
+        {/* NAV LINKS */}
+        <div className="hidden lg:flex items-center gap-2 bg-[#0C0C14] p-1 rounded-xl">
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.href);
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative px-6 py-2.5 rounded-xl text-sm font-medium transition duration-200 ${
+                  active
+                    ? "text-white bg-[#201633] border border-[#432371]/60"
+                    : "text-[#8E8E9F] hover:text-white border border-transparent"
+                }`}
+              >
+                <span className="relative z-10">{link.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* Dashboard only when logged in */}
+          {user && (
             <Link
-              href={"/"}
-              className={`text-sm font-medium transition-colors ${pathname.startsWith("/dashboard") ? "text-pink-500 font-semibold" : "text-slate-300 hover:text-white"}`}
+              href= {`/dashboard/${session?.user?.role}`}
+              className={`relative px-6 py-2.5 rounded-xl text-sm font-medium transition duration-200 ${
+                pathname.startsWith("/dashboard")
+                  ? "text-white bg-[#201633] border border-[#432371]/60"
+                  : "text-[#8E8E9F] hover:text-white border border-transparent"
+              }`}
             >
-              Dashboard
+              <span className="relative z-10">Dashboard</span>
             </Link>
           )}
         </div>
 
-        {/* RIGHT ACTIONS */}
-        <div className="flex items-center gap-4">
-
-
-          {!isLoggedIn && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsLoggedIn(true)}
-                className="inline-flex items-center justify-center font-semibold text-xs text-slate-300 hover:text-white h-9 px-4 rounded-xl hover:bg-white/5 transition"
-              >
-                Login
-              </button>
+        {/* RIGHT SIDE */}
+        <div className="hidden lg:flex items-center gap-5">
+          {!user ? (
+            <>
+              <Link href="/auth/login">
+                <button className="text-sm font-medium text-[#8E8E9F] hover:text-white transition cursor-pointer">
+                  Login
+                </button>
+              </Link>
               <Link
-                href="/register"
-                className="inline-flex items-center justify-center font-semibold text-xs bg-gradient-to-r from-pink-500 to-indigo-600 text-white shadow-lg shadow-pink-500/10 hover:shadow-pink-500/20 transition h-9 px-4 rounded-xl"
+                href="/auth/register"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7928CA] via-[#B342F2] to-[#F242C2] text-white text-sm font-semibold shadow-lg shadow-[#B342F2]/10 hover:shadow-[#B342F2]/20 transition duration-300"
               >
                 Sign Up
               </Link>
-            </div>
-          )}
-
-          {isLoggedIn && (
+            </>
+          ) : (
             <div className="relative" ref={dropdownRef}>
+              {/* Avatar */}
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center transition-transform hover:scale-105 outline-none focus:outline-none cursor-pointer"
+                className="flex items-center focus:outline-none transition transform hover:scale-105 active:scale-95"
               >
-                <img
-                  className="w-9 h-9 rounded-full object-cover border border-pink-500 shadow-md shadow-pink-500/10"
-                  src={mockUser.image}
-                  alt="avatar"
-                />
+                <div className="relative w-9 h-9 rounded-full p-[2px] bg-gradient-to-tr from-[#7928CA] to-[#B342F2]">
+                  <Image
+                    src={
+                      session?.user?.image ||
+                      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"
+                    }
+                    alt="avatar"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-cover rounded-full bg-[#12121C]"
+                  />
+                </div>
               </button>
 
+              {/* DROPDOWN */}
               {dropdownOpen && (
-                <div className="absolute right-0 mt-3 w-56 bg-slate-900/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl py-2 z-55 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {/* User info */}
-                  <div className="px-4 py-2.5 border-b border-white/5 mb-1.5 cursor-default">
-                    <p className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">
-                      {mockUser.role} Account
+                <div className="absolute right-0 mt-3 w-60 bg-[#12121C] border border-[#27273A] rounded-xl shadow-2xl p-1.5 text-sm z-50 text-slate-200">
+                  <div className="px-3 py-2.5 border-b border-[#27273A]/60 mb-1">
+                    <p className="text-[10px] font-bold text-[#B342F2] uppercase tracking-wider">
+                      {session?.user?.role || "User"}
                     </p>
-                    <p className="font-bold text-white text-sm mt-0.5">{mockUser.name}</p>
-                    <p className="text-[11px] text-slate-400 truncate mt-0.5">{mockUser.email}</p>
+                    <p className="text-white font-bold truncate mt-0.5">
+                      {session?.user?.name}
+                    </p>
+                    <p className="text-xs text-[#8E8E9F] truncate">
+                      {session?.user?.email}
+                    </p>
                   </div>
 
-                  {/* Actions */}
                   <Link
-                    href="/dashboard/organizer"
-                    onClick={() => setDropdownOpen(false)}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                    href={`/dashboard/${session?.user?.role}`}
+                    className="flex items-center gap-2.5 px-3 py-2 hover:bg-[#161622] text-[#8E8E9F] hover:text-white rounded-lg transition"
                   >
-                    <FaThLarge className="text-slate-400 text-sm shrink-0" />
-                    <span>My Dashboard</span>
+                    <FiGrid className="text-sm" /> Dashboard
                   </Link>
 
                   <Link
-                    href={`/dashboard/${mockUser.role}`}
-                    onClick={() => setDropdownOpen(false)}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                    href="/dashboard"
+                    className="flex items-center gap-2.5 px-3 py-2 hover:bg-[#161622] text-[#8E8E9F] hover:text-white rounded-lg transition"
                   >
-                    <FaUser className="text-slate-400 text-sm shrink-0" />
-                    <span>Profile Settings</span>
+                    <FiUser className="text-sm" /> Profile
                   </Link>
-
-                  <div className="border-t border-white/5 my-1.5" />
 
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/5 transition cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#F242C2] hover:bg-[#F242C2]/10 rounded-lg transition text-left font-medium mt-1 border-t border-[#27273A]/30"
                   >
-                    <FaSignOutAlt className="text-sm shrink-0 text-red-400" />
-                    <span>Log Out</span>
+                    <FiLogOut className="text-sm" /> Logout
                   </button>
                 </div>
               )}
             </div>
           )}
         </div>
+
+        {/* MOBILE BUTTON */}
+        <button
+          className="lg:hidden w-10 h-10 rounded-xl bg-[#12121C] border border-[#27273A]/60 flex items-center justify-center text-white text-xl transition"
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          {mobileOpen ? <FiX /> : <FiMenu />}
+        </button>
       </div>
+
+      {/* MOBILE MENU */}
+      {mobileOpen && (
+        <div className="lg:hidden px-2 pt-3 pb-4 flex flex-col gap-1.5 border-t border-[#27273A]/60 bg-[#0C0C14] overflow-hidden">
+          {/* USER INFO */}
+          {user && (
+            <div className="flex items-start gap-3 px-4 py-3 mb-2 bg-[#12121C] border border-[#27273A]/50 rounded-xl">
+              <div className="relative w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-[#7928CA] to-[#B342F2] flex-shrink-0 mt-0.5">
+                <Image
+                  src={
+                    session?.user?.image ||
+                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"
+                  }
+                  alt="avatar"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-cover rounded-full bg-[#12121C]"
+                />
+              </div>
+              <div className="truncate flex-1">
+                <p className="text-[9px] font-bold text-[#B342F2] uppercase tracking-wider leading-none">
+                  {session?.user?.role || "User"}
+                </p>
+                <p className="text-sm font-bold text-white truncate mt-1">
+                  {session?.user?.name}
+                </p>
+                <p className="text-xs text-[#8E8E9F] truncate mt-0.5">
+                  {session?.user?.email}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className={`px-4 py-3 rounded-xl text-sm font-medium transition ${
+                isActive(link.href)
+                  ? "bg-[#201633] text-white border border-[#432371]/60"
+                  : "text-[#8E8E9F] hover:text-white hover:bg-[#12121C]"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {/*  Dashboard only when logged in */}
+          {user && (
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className={`px-4 py-3 rounded-xl text-sm font-medium transition ${
+                pathname.startsWith("/dashboard")
+                  ? "bg-[#201633] text-white border border-[#432371]/60"
+                  : "text-[#8E8E9F] hover:text-white hover:bg-[#12121C]"
+              }`}
+            >
+              Dashboard
+            </Link>
+          )}
+
+          <div className="mt-1 pt-3 border-t border-[#27273A]/60 flex flex-col gap-2">
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-3 rounded-xl text-sm font-medium text-[#F242C2] hover:bg-[#F242C2]/10 transition text-left flex items-center gap-2"
+              >
+                <FiLogOut /> Logout
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 px-2">
+                <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                  <button className="w-full py-2.5 rounded-xl text-sm font-medium text-white bg-[#12121C] border border-[#27273A]/60 hover:bg-[#161622] transition">
+                    Login
+                  </button>
+                </Link>
+
+                <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
+                  <button className="w-full py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-[#7928CA] to-[#B342F2] shadow-md">
+                    Sign Up
+                  </button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
