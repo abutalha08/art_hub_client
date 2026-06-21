@@ -16,6 +16,13 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "placeholder-google-client-secret"
     }
   },
+   user: {
+     additionalFields: {
+      role: {
+        defaultValue: 'buyer',
+      },
+  },
+},
 
   database: mongodbAdapter(db, {
     // Optional: if you don't provide a client, database transactions won't be enabled.
