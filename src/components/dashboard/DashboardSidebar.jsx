@@ -15,6 +15,15 @@ import {
   FaHome,
   FaBars,
 } from "react-icons/fa";
+import { 
+  FiGrid, 
+  FiUploadCloud, 
+  FiImage, 
+  FiDollarSign, 
+  FiMessageSquare, 
+  FiUser, 
+  FiSettings 
+} from "react-icons/fi";
 import { Button, Drawer } from "@heroui/react";
 
 import Image from "next/image";
@@ -29,10 +38,12 @@ const MENU_BY_ROLE = {
     { key: "Profile Management", label: "Profile Management", icon: FaShoppingCart, href: "/dashboard/profile-management" },
   ],
   artist: [
-    { key: "overview", label: "Overview", icon: FaPalette, href: "/dashboard/artist" },
-    { key: "add-artworks", label: "Add Artwork", icon: FaPlus, href: "/dashboard/artist/add-artworks" },
-    { key: "manage-artworks", label: "Manage Artworks", icon: FaImage, href: "/dashboard/artist/manage-artworks" },
-    { key: "sales", label: "Sales History", icon: FaShoppingCart, href: "/dashboard/artist/sales" },
+    { key: "overview", label: "Dashboard", icon: FiGrid, href: "/dashboard/artist" },
+    { key: "upload", label: "Upload Artwork", icon: FiUploadCloud, href: "/dashboard/artist/upload" },
+    { key: "manage-artworks", label: "Manage Artworks", icon: FiImage, href: "/dashboard/artist/manage-artworks" },
+    { key: "earnings", label: "Earnings & Sales", icon: FiDollarSign, href: "/dashboard/artist/earnings" },
+    { key: "profile", label: "Artist Profile", icon: FiUser, href: "/dashboard/artist/profile" },
+   
   ],
   admin: [
     { key: "users", label: "Manage Users", icon: FaUsers, href: "/dashboard/users" },
