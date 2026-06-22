@@ -1,7 +1,8 @@
 "use client";
 
 import DashboardHeading from "@/components/DashboardHeading";
-// import { addArtwork } from "@/lib/api/artworks/actions";
+import { createArtwork } from "@/lib/actions/artworks";
+
 import { useSession } from "@/lib/auth-client";
 import { uploadImage } from "@/utils/uploadImage";
 import {
@@ -20,10 +21,10 @@ import { FaImage, FaPalette } from "react-icons/fa";
 
 const AddArtworkPage = () => {
 
-//     const router = useRouter();
+    const router = useRouter();
 
 
-//   const { data: session } = useSession();
+  const { data: session } = useSession();
 
   const CATEGORIES = [
     "Digital Art",
@@ -37,61 +38,57 @@ const AddArtworkPage = () => {
 
   const {
     register,
-    // handleSubmit,
+    handleSubmit,
     formState: { errors },
   } = useForm();
 
-//   const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
 
-//     console.log(data)
-//     try {
-//       const imageFile = data.image?.[0];
+    console.log(data)
+    try {
+      const imageFile = data.image?.[0];
 
-//         const imageUrl = await uploadImage(imageFile);
-//     //     console.log(imageUrl, "imageurl");
-
-
-
-//       const payload = {
-//         title: data.title,
-//         description: data.description,
-//         price: Number(data.price),
-//         category: data.category,
-//         image: imageUrl,
-//         artistEmail: session?.user?.email,
-//         artistName: session?.user?.name,
-//         artistId:session?.user?.id,
-//       };
-
-//     // delete data?.image;
-
-//     // const updateData= {
-//     //     ...data,
-//     //     image: imageUrl,
-//     //     artistEmail: session?.user?.email,
-//     // }
+        const imageUrl = await uploadImage(imageFile);
+    //     console.log(imageUrl, "imageurl");
 
 
 
-//     //   const result = await addArtwork(payload);
-    
-//     //   const result = await addArtwork(updateData);
+      const payload = {
+        title: data.title,
+        description: data.description,
+        price: Number(data.price),
+        category: data.category,
+        image: imageUrl,
+        artistEmail: session?.user?.email,
+        artistName: session?.user?.name,
+        artistId:session?.user?.id,
+        status: "active"
+      };
 
-//       console.log(result);
+   
 
-//       if (result.insertedId) {
-//         toast.success("Artwork uploaded successfully!");
 
-//         router.push("/artworks");
 
-//       } else {
-//         toast.error(result.message || "Failed to upload artwork");
-//       }
+      const result = await createArtwork(payload);
 
-//     } catch (error) {
-//       toast.error("Something went wrong!");
-//     }
-//   };
+   
+
+      console.log(result);
+
+      if (result.insertedId) {
+        toast.success("Artwork uploaded successfully!");
+
+        // router.push("/artworks");
+        router.push("/dashboard/artist");
+
+      } else {
+        toast.error(result.message || "Failed to upload artwork");
+      }
+
+    } catch (error) {
+      toast.error("Something went wrong!");
+    }
+  };
 
   // shared input style (theme focus fix)
   const inputClass =
@@ -117,7 +114,7 @@ const AddArtworkPage = () => {
           </CardHeader>
 
           <div className="p-6">
-            <Form className="space-y-5 w-full">
+            <Form onSubmit={handleSubmit(onSubmit)} className="space-y-5 w-full">
 
               {/* TITLE */}
               <div className="w-full">
