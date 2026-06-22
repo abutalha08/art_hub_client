@@ -39,8 +39,8 @@ const MENU_BY_ROLE = {
   ],
   artist: [
     { key: "overview", label: "Dashboard", icon: FiGrid, href: "/dashboard/artist" },
-    { key: "upload", label: "Upload Artwork", icon: FiUploadCloud, href: "/dashboard/artist/upload" },
-    { key: "manage-artworks", label: "Manage Artworks", icon: FiImage, href: "/dashboard/artist/manage-artworks" },
+    { key: "upload", label: "Upload Artwork", icon: FiUploadCloud, href: "/dashboard/artist/artworks/new" },
+    { key: "manage-artworks", label: "Manage Artworks", icon: FiImage, href: "/dashboard/artist/artworks" },
     { key: "earnings", label: "Earnings & Sales", icon: FiDollarSign, href: "/dashboard/artist/earnings" },
     { key: "profile", label: "Artist Profile", icon: FiUser, href: "/dashboard/artist/profile" },
    
@@ -109,7 +109,7 @@ export default function DashboardSidebar() {
 
         {menuItems.map(({ key, label, icon: Icon, href }) => {
           const target = getPath(key);
-          const active = pathname === target;
+          const active = pathname === href || pathname === target;
 
           return (
             <Link
