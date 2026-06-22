@@ -12,3 +12,15 @@ export const createArtwork = async (newArtworkData) => {
 
     return res.json();
 }
+
+// প্রোফাইল আপডেট করার জন্য ফ্রন্টএন্ড ফাংশন
+export const updateArtistProfile = async (currentEmail, updateData) => {
+    const res = await fetch(`${baseUrl}/api/users/${currentEmail}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+    });
+    return res.json();
+}
